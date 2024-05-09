@@ -1,36 +1,34 @@
 import 'dart:convert';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:stray_pet/menuBar.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
 
 class DetailPage extends StatefulWidget {
-  final int id;
+  final String userId;
+  final int petId;
 
-  const DetailPage({super.key, required this.id});
+  const DetailPage({super.key, required this.petId, required this.userId});
 
   @override
   State<DetailPage> createState() => _DetailPageState();
 }
 
 class _DetailPageState extends State<DetailPage> {
+  late String userId;
   Map<String, dynamic> _petDetail = {};
 
   @override
   void initState() {
     super.initState();
     _fetchPetDetail();
-  }
-
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(message),
-      duration: const Duration(seconds: 2),
-    ));
+    userId = widget.userId;
   }
 
   Future<void> _fetchPetDetail() async {
     final response =
-        await http.get(Uri.parse('http://10.0.2.2:3000/pets/${widget.id}'));
+        await http.get(Uri.parse('http://10.0.2.2:3000/pets/${widget.petId}'));
     final data = json.decode(response.body);
     setState(() {
       _petDetail = data;
@@ -40,7 +38,7 @@ class _DetailPageState extends State<DetailPage> {
   Future<void> _adoptPet() async {
     // update pet status to adopted
     final response = await http.put(
-      Uri.parse('http://10.0.2.2:3000/pets/${widget.id}'),
+      Uri.parse('http://10.0.2.2:3000/pets/${widget.petId}'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -50,9 +48,17 @@ class _DetailPageState extends State<DetailPage> {
     );
 
     if (response.statusCode == 200) {
-      _showSnackBar('Adopted ${_petDetail['pet_name']} successfully!');
+      Get.snackbar('Adopt Successful!!', 'Adopted ${_petDetail['pet_name']}',
+          backgroundColor: Colors.green, colorText: Colors.white);
+
+      // navigate to home page
+      await Future.delayed(const Duration(seconds: 2));
+      Get.offAll(() => MyMenu(userId: userId));
     } else {
-      _showSnackBar('Failed to adopt ${_petDetail['pet_name']}');
+      Get.snackbar(
+          'Something went wrong!!', 'Failed to adopt ${_petDetail['pet_name']}',
+          backgroundColor: Colors.red, colorText: Colors.white);
+      throw Exception('Failed to adopt ${_petDetail['pet_name']}');
     }
   }
 
@@ -222,7 +228,7 @@ class _DetailPageState extends State<DetailPage> {
                       builder: (context) {
                         return AlertDialog(
                           title: Text(
-                            'ยืนยันการรับเลี้ยง',
+                            'Confirm Adoption',
                             style: GoogleFonts.notoSans(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -230,7 +236,7 @@ class _DetailPageState extends State<DetailPage> {
                             ),
                           ),
                           content: Text(
-                              'คุณต้องการรับเลี้ยง ${_petDetail['pet_name']} ใช่หรือไม่? ',
+                              'Do you want to adopt ${_petDetail['pet_name']} ? ',
                               style: GoogleFonts.notoSans(
                                   fontSize: 16,
                                   color:
@@ -240,7 +246,7 @@ class _DetailPageState extends State<DetailPage> {
                               onPressed: () {
                                 Navigator.of(context).pop();
                               },
-                              child: Text('ยกเลิก',
+                              child: Text('cancel',
                                   style: GoogleFonts.notoSans(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -252,7 +258,7 @@ class _DetailPageState extends State<DetailPage> {
                                   _adoptPet();
                                 },
                                 child: Text(
-                                  'รับเลี้ยง',
+                                  'Adopt',
                                   style: GoogleFonts.notoSans(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,

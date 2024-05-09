@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -5,24 +6,46 @@ import 'package:stray_pet/pages/loginPage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stray_pet/pages/editProfile.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   final String userId;
-  final List<dynamic> _userInfo = [];
 
-  ProfilePage({super.key, required this.userId});
+  const ProfilePage({super.key, required this.userId});
 
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  late String userId;
+
+  var user_dsName = '';
+  var user_email = '';
+  var user_phone = '';
+  var user_address = '';
+
+  @override
   void initState() {
-    initState();
+    super.initState();
+    userId = widget.userId;
     _fetchUserInfo();
   }
 
   Future<void> _fetchUserInfo() async {
-    final response =
-        await http.get(Uri.parse('https://api.example.com/users/$userId'));
+    final response = await http.get(
+      Uri.parse('http://10.0.2.2:3000/users/$userId'),
+    );
+
     if (response.statusCode == 200) {
-      _userInfo.add(response.body);
+      final data = jsonDecode(response.body);
+      setState(() {
+        user_dsName = data['user_dsName'];
+        user_email = data['user_email'];
+        user_phone = data['user_phone'];
+        user_address = data['user_address'];
+      });
     } else {
-      throw Exception('Failed to load user information');
+      Get.snackbar('Error', 'Failed to load user information',
+          backgroundColor: Colors.red, colorText: Colors.white);
     }
   }
 
@@ -44,7 +67,9 @@ class ProfilePage extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () {
-              Get.to(const EditProfilePage());
+              Get.to(EditProfilePage(
+                userId: userId,
+              ));
             },
             icon: const Icon(Icons.edit),
           ),
@@ -58,7 +83,7 @@ class ProfilePage extends StatelessWidget {
           child: Column(
             children: [
               // User Avatar
-              CircleAvatar(
+              const CircleAvatar(
                 radius: 70,
                 backgroundImage: NetworkImage('https://i.pravatar.cc/150'),
               ),
@@ -68,10 +93,10 @@ class ProfilePage extends StatelessWidget {
 
               // User Name
               Text(
-                userId,
+                user_dsName != '' ? user_dsName : userId,
                 style: GoogleFonts.notoSans(
                   color: const Color.fromARGB(255, 48, 48, 48),
-                  fontSize: 20,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -81,7 +106,7 @@ class ProfilePage extends StatelessWidget {
 
               // User Email
               Text(
-                'Email',
+                user_email != '' ? user_email : '[Email is private]',
                 style: GoogleFonts.notoSans(
                   color: const Color.fromARGB(255, 48, 48, 48),
                   fontSize: 16,
@@ -92,15 +117,27 @@ class ProfilePage extends StatelessWidget {
               ),
 
               // User Address
-              Text(
-                '1234 Main St, New York, NY 10001',
-                style: GoogleFonts.notoSans(
-                  color: const Color.fromARGB(255, 48, 48, 48),
-                  fontSize: 16,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.location_on,
+                    color: Color.fromARGB(255, 163, 0, 0),
+                  ),
+                  const SizedBox(
+                    width: 5,
+                  ),
+                  Text(
+                    user_address != '' ? user_address : '... address ...',
+                    style: GoogleFonts.notoSans(
+                      color: const Color.fromARGB(255, 48, 48, 48),
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(
-                height: 40,
+                height: 25,
               ),
 
               // Menu

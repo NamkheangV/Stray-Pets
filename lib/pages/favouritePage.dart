@@ -1,9 +1,7 @@
 import 'dart:convert';
-import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
-import 'package:stray_pet/pages/detailPage.dart';
 
 class FavouritePage extends StatefulWidget {
   const FavouritePage({super.key});
@@ -82,9 +80,7 @@ class _FavouritePageState extends State<FavouritePage> {
                           children: [
                             for (final strayPet in _strayPets)
                               InkWell(
-                                onTap: () {
-                                  Get.to(() => DetailPage(id: strayPet['id']));
-                                },
+                                onTap: () {},
                                 child: Container(
                                   padding: const EdgeInsets.all(5),
                                   decoration: BoxDecoration(

@@ -18,13 +18,6 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(message),
-      duration: const Duration(seconds: 2),
-    ));
-  }
-
   Future<void> _login() async {
     final url = Uri.parse('http://10.0.2.2:3000/auth');
     final response = await http.post(
@@ -42,13 +35,16 @@ class _LoginPageState extends State<LoginPage> {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
+      Get.snackbar('Login Successful!!', 'Login successful',
+          backgroundColor: Colors.green, colorText: Colors.white);
+
+      await Future.delayed(const Duration(seconds: 2));
       Get.offAll(() => MyMenu(
             userId: data['user_id'],
           ));
-      _showSnackBar(
-          'Login Success!!, ${_usernameController.text}! Please wait a moment...');
     } else {
-      _showSnackBar('Invalid email or password');
+      Get.snackbar('Something went wrong!!', 'Failed to login',
+          backgroundColor: Colors.red, colorText: Colors.white);
     }
   }
 
@@ -64,7 +60,7 @@ class _LoginPageState extends State<LoginPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Logo
-            Image(
+            const Image(
               image: AssetImage('assets/images/login-logo.png'),
               width: 150,
             ),
@@ -136,9 +132,20 @@ class _LoginPageState extends State<LoginPage> {
                       if (_formKey.currentState!.validate()) {
                         _login();
                       } else {
-                        _showSnackBar('Please enter your email and password');
+                        Get.snackbar('Error', 'Please check your input',
+                            backgroundColor: Colors.red,
+                            colorText: Colors.white);
                       }
                     },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(35),
+                      ),
+                      minimumSize: const Size(double.maxFinite, 60),
+                      shadowColor: Colors.black,
+                      elevation: 8,
+                    ),
                     child: const Text(
                       'LOGIN',
                       style: TextStyle(
@@ -146,15 +153,6 @@ class _LoginPageState extends State<LoginPage> {
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 111, 6, 6),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(35),
-                      ),
-                      minimumSize: const Size(double.maxFinite, 60),
-                      shadowColor: Colors.black,
-                      elevation: 8,
                     ),
                   ),
                   const SizedBox(
@@ -182,7 +180,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: const Text(
                     'Register',
                     style: TextStyle(
-                      color: Color.fromARGB(255, 111, 6, 6),
+                      color: Colors.blue,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),

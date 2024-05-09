@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:stray_pet/pages/login_Page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stray_pet/pages/detailPage.dart';
 import 'package:stray_pet/components/petsBox.dart';
+import 'loginPage.dart';
 
 class HomePage extends StatefulWidget {
   final String userId;
@@ -17,39 +17,47 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<String> _userInfo = [];
+  late String userId;
+  var user_dsName = '';
+
   List<dynamic> _strayPets = [];
 
   @override
   void initState() {
     super.initState();
-    _fetchUser();
+    userId = widget.userId;
     _fetchStrayPets();
+    _fetchUserInfo();
   }
 
-  Future<void> _fetchUser() async {
-    final response = await http.get(Uri.parse(
-      'http://10.0.2.2/3000/${widget.userId}',
-    ));
+  Future<void> _fetchUserInfo() async {
+    final response = await http.get(
+      Uri.parse('http://10.0.2.2:3000/users/$userId'),
+    );
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       setState(() {
-        _userInfo = data;
+        user_dsName = data['user_dsName'];
       });
-
-      print(_userInfo);
+    } else {
+      Get.snackbar('Error', 'Failed to load user information',
+          backgroundColor: Colors.red, colorText: Colors.white);
     }
   }
 
   Future<void> _fetchStrayPets() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:3000/pets'));
+    final response = await http.get(
+      Uri.parse('http://10.0.2.2:3000/pets'),
+    );
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       setState(() {
         _strayPets = data;
       });
+    } else {
+      Get.snackbar('Error', 'Failed to load stray pets');
     }
   }
 
@@ -68,10 +76,10 @@ class _HomePageState extends State<HomePage> {
                   Row(
                     children: [
                       // User Avatar
-                      CircleAvatar(
+                      const CircleAvatar(
                         radius: 30,
                         backgroundImage:
-                            const NetworkImage('https://i.pravatar.cc/150'),
+                            NetworkImage('https://i.pravatar.cc/150'),
                       ),
                       const SizedBox(width: 10),
 
@@ -86,7 +94,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           Text(
-                            'username',
+                            user_dsName != '' ? user_dsName : userId,
                             style: GoogleFonts.notoSans(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -237,7 +245,8 @@ class _HomePageState extends State<HomePage> {
                                       InkWell(
                                         onTap: () {
                                           Get.to(() => DetailPage(
-                                              id: strayPet['pet_id']));
+                                              petId: strayPet['pet_id'],
+                                              userId: userId));
                                         },
                                         child: PetsBox(strayPet: strayPet),
                                       ),
