@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:stray_pet/menuBar.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:stray_pet/pages/loginPage.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -16,8 +17,8 @@ class _SplashPageState extends State<SplashPage> {
   void initState() {
     super.initState();
     Timer(const Duration(seconds: 3), () {
-      Navigator.of(context)
-          .pushReplacement(MaterialPageRoute(builder: (_) => const MyMenu()));
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const LoginPage()));
     });
   }
 
@@ -47,19 +48,20 @@ class _SplashPageState extends State<SplashPage> {
               // CircularProgressIndicator(
               //   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               // ),
-              Text('Adopt Pet',
-                  style: TextStyle(
+              Text('ADOPT PET',
+                  style: GoogleFonts.shantellSans(
                     color: Colors.white,
-                    fontSize: 32,
+                    fontSize: 30,
                     fontWeight: FontWeight.bold,
                   )),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               Text('By 6401861 Suchanart',
-                  style: TextStyle(
+                  style: GoogleFonts.notoSans(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
                   )),
             ],
           )),

@@ -21,15 +21,39 @@ class _DetailPageState extends State<DetailPage> {
     _fetchPetDetail();
   }
 
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+      duration: const Duration(seconds: 2),
+    ));
+  }
+
   Future<void> _fetchPetDetail() async {
-    final response = await http
-        .get(Uri.parse('https://api.jsonbin.io/v3/b/66030db62b1b334a633bb9bf'));
+    final response =
+        await http.get(Uri.parse('http://10.0.2.2:3000/pets/${widget.id}'));
     final data = json.decode(response.body);
     setState(() {
-      _petDetail = data['record'].firstWhere((element) {
-        return element['id'] == widget.id;
-      });
+      _petDetail = data;
     });
+  }
+
+  Future<void> _adoptPet() async {
+    // update pet status to adopted
+    final response = await http.put(
+      Uri.parse('http://10.0.2.2:3000/pets/${widget.id}'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'status': true,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      _showSnackBar('Adopted ${_petDetail['pet_name']} successfully!');
+    } else {
+      _showSnackBar('Failed to adopt ${_petDetail['pet_name']}');
+    }
   }
 
   @override
@@ -65,7 +89,7 @@ class _DetailPageState extends State<DetailPage> {
                       height: 380,
                       decoration: BoxDecoration(
                         image: DecorationImage(
-                          image: NetworkImage(_petDetail['petImage']),
+                          image: NetworkImage(_petDetail['pet_img']),
                           fit: BoxFit.cover,
                         ),
                         borderRadius: BorderRadius.circular(20),
@@ -77,7 +101,7 @@ class _DetailPageState extends State<DetailPage> {
                     Row(
                       children: [
                         Text(
-                          _petDetail['name'],
+                          _petDetail['pet_name'],
                           style: GoogleFonts.notoSans(
                             color: const Color.fromARGB(255, 48, 48, 48),
                             fontSize: 32,
@@ -96,7 +120,7 @@ class _DetailPageState extends State<DetailPage> {
 
                     // type
                     Text(
-                      ' The ${_petDetail['type']}',
+                      ' The ${_petDetail['pet_type']}',
                       style: GoogleFonts.notoSans(
                         color: const Color.fromARGB(255, 104, 104, 104),
                         fontSize: 16,
@@ -118,7 +142,7 @@ class _DetailPageState extends State<DetailPage> {
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: _petDetail['gender'] == 1
+                            child: _petDetail['pet_gender'] == 1
                                 ? const Icon(
                                     Icons.male,
                                     color: Colors.blue,
@@ -144,7 +168,7 @@ class _DetailPageState extends State<DetailPage> {
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Text(
-                                    ' ${_petDetail['age']}',
+                                    ' ${_petDetail['pet_age']}',
                                     style: GoogleFonts.notoSans(
                                       color: const Color.fromARGB(
                                           255, 104, 104, 104),
@@ -168,7 +192,7 @@ class _DetailPageState extends State<DetailPage> {
                     const SizedBox(height: 20),
                     // description
                     Text(
-                      _petDetail['description'],
+                      _petDetail['pet_description'],
                       style: GoogleFonts.notoSans(
                         color: const Color.fromARGB(255, 104, 104, 104),
                         fontSize: 16,
@@ -192,39 +216,87 @@ class _DetailPageState extends State<DetailPage> {
               children: [
                 // Adopt Me Button
                 ElevatedButton(
-                  onPressed: () {},
-                  child: Text(
-                    'Adopt Me',
-                    style: GoogleFonts.notoSans(
-                      color: Color.fromARGB(255, 255, 255, 255),
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Text(
+                            'ยืนยันการรับเลี้ยง',
+                            style: GoogleFonts.notoSans(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: const Color.fromARGB(255, 48, 48, 48),
+                            ),
+                          ),
+                          content: Text(
+                              'คุณต้องการรับเลี้ยง ${_petDetail['pet_name']} ใช่หรือไม่? ',
+                              style: GoogleFonts.notoSans(
+                                  fontSize: 16,
+                                  color:
+                                      const Color.fromARGB(255, 48, 48, 48))),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text('ยกเลิก',
+                                  style: GoogleFonts.notoSans(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color.fromARGB(255, 190, 0, 0),
+                                  )),
+                            ),
+                            TextButton(
+                                onPressed: () {
+                                  _adoptPet();
+                                },
+                                child: Text(
+                                  'รับเลี้ยง',
+                                  style: GoogleFonts.notoSans(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                        const Color.fromARGB(255, 71, 160, 211),
+                                  ),
+                                )),
+                          ],
+                        );
+                      },
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(255, 71, 160, 211),
+                    backgroundColor: const Color.fromARGB(255, 71, 160, 211),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                     padding: const EdgeInsets.all(15),
                     fixedSize: const Size(300, 65),
                   ),
+                  child: Text(
+                    'ADOPT ME',
+                    style: GoogleFonts.notoSans(
+                      color: const Color.fromARGB(255, 255, 255, 255),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
 
                 // Chat Button
                 ElevatedButton(
                   onPressed: () {},
-                  child: const Icon(
-                    Icons.chat_bubble_outline,
-                    size: 30,
-                    color: const Color.fromARGB(255, 71, 160, 211),
-                  ),
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                     padding: const EdgeInsets.all(15),
                     fixedSize: const Size(55, 65),
+                  ),
+                  child: const Icon(
+                    Icons.chat_bubble_outline,
+                    size: 30,
+                    color: Color.fromARGB(255, 71, 160, 211),
                   ),
                 ),
               ],
