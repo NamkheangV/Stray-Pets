@@ -46,9 +46,7 @@ class _RegisterPageState extends State<RegisterPage> {
       Get.snackbar('Something went wrong!!', 'Username already exists',
           backgroundColor: Colors.red, colorText: Colors.white);
       return;
-    }
-
-    if (response.statusCode == 201) {
+    } else if (response.statusCode == 201) {
       Get.snackbar('Register Successful!!', 'Register successful!!',
           backgroundColor: Colors.green, colorText: Colors.white);
 

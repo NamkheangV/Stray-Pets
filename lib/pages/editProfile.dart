@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:stray_pet/menuBar.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:stray_pet/splash.dart';
 
 class EditProfilePage extends StatefulWidget {
   final String userId;
@@ -43,7 +44,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
         'user_address': _addressController.text,
       }),
     );
-    print(response.body);
 
     if (response.statusCode == 200) {
       Get.snackbar('Update You Information Successful!!', 'Profile updated',
@@ -55,6 +55,23 @@ class _EditProfilePageState extends State<EditProfilePage> {
       Get.snackbar('Something went wrong!!', 'Failed to update profile',
           backgroundColor: Colors.red, colorText: Colors.white);
       throw Exception('Failed to update profile');
+    }
+  }
+
+  Future<void> _deleteAccount() async {
+    final response =
+        await http.delete(Uri.parse('http://10.0.2.2:3000/users/${userId}'));
+
+    if (response.statusCode == 200) {
+      Get.snackbar('Delete Account Successful!!', 'Hope to see you again!',
+          backgroundColor: Colors.green, colorText: Colors.white);
+
+      await Future.delayed(const Duration(seconds: 1));
+      Get.offAll(() => const SplashPage());
+    } else {
+      Get.snackbar('Something went wrong!!', 'Failed to delete account',
+          backgroundColor: Colors.red, colorText: Colors.white);
+      throw Exception('Failed to delete account');
     }
   }
 
@@ -86,130 +103,165 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ],
       ),
       body: Container(
-        padding: const EdgeInsets.all(25),
+        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
         width: double.maxFinite,
         height: double.maxFinite,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Form
-            Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  // Userid
-                  TextFormField(
-                    keyboardType: TextInputType.text,
-                    readOnly: true,
-                    initialValue: userId,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(35),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      prefixIcon: const Icon(Icons.lock),
-                      prefixIconConstraints: const BoxConstraints(
-                        minWidth: 80,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-
-                  // Display Name
-                  TextFormField(
-                    controller: _displayNameController,
-                    keyboardType: TextInputType.text,
-                    decoration: InputDecoration(
-                      hintText: 'DISPLAY NAME',
-                      hintStyle: const TextStyle(color: Colors.grey),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(35),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      prefixIcon: const Icon(Icons.person),
-                      prefixIconConstraints: const BoxConstraints(
-                        minWidth: 80,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-
-                  // Email
-                  TextFormField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      hintText: 'EMAIL',
-                      hintStyle: const TextStyle(color: Colors.grey),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(35),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      prefixIcon: const Icon(Icons.email),
-                      prefixIconConstraints: const BoxConstraints(
-                        minWidth: 80,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-
-                  // Phone Number
-                  TextFormField(
-                    controller: _phoneController,
-                    keyboardType: TextInputType.phone,
-                    decoration: InputDecoration(
-                      hintText: 'PHONE NUMBER',
-                      hintStyle: const TextStyle(color: Colors.grey),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(35),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      prefixIcon: const Icon(Icons.phone),
-                      prefixIconConstraints: const BoxConstraints(
-                        minWidth: 80,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-
-                  // Address
-                  TextFormField(
-                    controller: _addressController,
-                    keyboardType: TextInputType.text,
-                    decoration: InputDecoration(
-                      hintText: 'ADDRESS',
-                      hintStyle: const TextStyle(color: Colors.grey),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(35),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      prefixIcon: const Icon(Icons.location_on),
-                      prefixIconConstraints: const BoxConstraints(
-                        minWidth: 80,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 40,
-                  ),
-                ],
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.only(top: 20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Profile Icon
+              Container(
+                width: 100,
+                height: 100,
+                decoration: const BoxDecoration(
+                  color: Colors.grey,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.person,
+                  size: 50,
+                  color: Colors.white,
+                ),
               ),
-            ),
-          ],
+              const SizedBox(
+                height: 50,
+              ),
+              // Form
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    // Userid
+                    TextFormField(
+                      keyboardType: TextInputType.text,
+                      readOnly: true,
+                      initialValue: userId,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(35),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        prefixIcon: const Icon(Icons.lock),
+                        prefixIconConstraints: const BoxConstraints(
+                          minWidth: 80,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+
+                    // Display Name
+                    TextFormField(
+                      controller: _displayNameController,
+                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration(
+                        hintText: 'DISPLAY NAME',
+                        hintStyle: const TextStyle(color: Colors.grey),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(35),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        prefixIcon: const Icon(Icons.person),
+                        prefixIconConstraints: const BoxConstraints(
+                          minWidth: 80,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+
+                    // Email
+                    TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        hintText: 'EMAIL',
+                        hintStyle: const TextStyle(color: Colors.grey),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(35),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        prefixIcon: const Icon(Icons.email),
+                        prefixIconConstraints: const BoxConstraints(
+                          minWidth: 80,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+
+                    // Phone Number
+                    TextFormField(
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      decoration: InputDecoration(
+                        hintText: 'PHONE NUMBER',
+                        hintStyle: const TextStyle(color: Colors.grey),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(35),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        prefixIcon: const Icon(Icons.phone),
+                        prefixIconConstraints: const BoxConstraints(
+                          minWidth: 80,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+
+                    // Address
+                    TextFormField(
+                      controller: _addressController,
+                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration(
+                        hintText: 'ADDRESS',
+                        hintStyle: const TextStyle(color: Colors.grey),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(35),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        prefixIcon: const Icon(Icons.location_on),
+                        prefixIconConstraints: const BoxConstraints(
+                          minWidth: 80,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 40,
+                    ),
+                  ],
+                ),
+              ),
+
+              // Delete Account
+              TextButton(
+                onPressed: () {
+                  _deleteAccount();
+                },
+                child: Text(
+                  'Delete Account',
+                  style: GoogleFonts.notoSans(
+                    color: Colors.red,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

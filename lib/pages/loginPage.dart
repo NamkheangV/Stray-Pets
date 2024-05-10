@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:stray_pet/menuBar.dart';
 import 'package:http/http.dart' as http;
 import 'package:stray_pet/pages/registerPage.dart';
@@ -177,9 +178,9 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed: () {
                     Get.to(() => const RegisterPage());
                   },
-                  child: const Text(
+                  child: Text(
                     'Register',
-                    style: TextStyle(
+                    style: GoogleFonts.notoSans(
                       color: Colors.blue,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
